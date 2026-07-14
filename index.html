@@ -481,8 +481,14 @@ function ytLoad(cb) {
     document.head.appendChild(sc);
   }
 }
+function ytNoCaptions(p) { // 유튜브 자체 자막(CC) 끄기 — 자동생성 자막 트랙을 비우고 모듈도 내림. 영상 바뀔 때마다 다시 꺼야 함
+  try { p.setOption('captions', 'track', {}); } catch(e) {}
+  try { p.setOption('cc', 'track', {}); } catch(e) {}
+  try { p.unloadModule('captions'); p.unloadModule('cc'); } catch(e) {}
+}
 function applyYtSettings() {
   if (!ytPlayer || !ytPlayer.setVolume) return;
+  ytNoCaptions(ytPlayer);
   ytPlayer.setVolume(Math.min(settings.vol, settings.cap));
   ytPlayer.setPlaybackRate(settings.speed); // 유튜브는 0.75/1 등 지원 배속에 가장 가까운 값으로 적용됨
   ytPlayer.playVideo();
@@ -496,7 +502,8 @@ function ytPlay(videoId) {
       playerVars: {autoplay:1, controls:0, rel:0, iv_load_policy:3, disablekb:1, fs:0, playsinline:1},
       events: {
         onReady: applyYtSettings,
-        onStateChange: e => { if (e.data === 0 && usingYT && playing) praise(); },
+        onApiChange: () => ytNoCaptions(ytPlayer), // 자막 모듈이 로드되는 순간 바로 끔
+        onStateChange: e => { if (e.data === 1) ytNoCaptions(ytPlayer); if (e.data === 0 && usingYT && playing) praise(); },
         onError: e => {
           if (!usingYT || !playing) return;
           const ov = document.getElementById('overlay');
@@ -1002,9 +1009,10 @@ function syncToStep2() {
   sv.style.display = ytid ? 'none' : 'block';
   if (ytid) {
     ytLoad(() => {
-      if (syncYtPlayer) syncYtPlayer.loadVideoById(ytid);
+      if (syncYtPlayer) { syncYtPlayer.loadVideoById(ytid); ytNoCaptions(syncYtPlayer); }
       else syncYtPlayer = new YT.Player('syncYtDiv', { width:'100%', height:'100%', videoId:ytid,
-        playerVars:{autoplay:1, controls:1, rel:0, playsinline:1} }); // 싱크 도구에선 유튜브 기본 컨트롤 허용(구간 이동용)
+        playerVars:{autoplay:1, controls:1, rel:0, playsinline:1}, // 싱크 도구에선 유튜브 기본 컨트롤 허용(구간 이동용)
+        events:{ onReady: e => ytNoCaptions(e.target), onApiChange: () => ytNoCaptions(syncYtPlayer), onStateChange: e => { if (e.data === 1) ytNoCaptions(syncYtPlayer); } } });
     });
   } else {
     sv.src = isUrl(syncSong.f) ? syncSong.f : '영상/' + syncSong.f;
