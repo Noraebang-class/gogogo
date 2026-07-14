@@ -395,9 +395,9 @@ const SYNC_BUILTIN = {"1":{"draft":true,"lines":[{"start":0.0,"text":"지…"},{
 /* 곡 번호 개편(2026-07-14) 이전의 브라우저 저장 데이터는 번호가 어긋나 중복·유령 곡을 만들므로
    1회 전체 청소 — 진짜 데이터는 data/karaoke-data.json에서 곧바로 다시 불러옴 */
 const ONLINE = true; // 온라인판(GitHub Pages): 서버 저장 없음, 기기별 localStorage에 저장
-if (localStorage.getItem('krk_schema') !== '20260714') {
+if (localStorage.getItem('krk_schema') !== '20260715') {
   Object.keys(localStorage).filter(k => k.startsWith('krk_')).forEach(k => localStorage.removeItem(k));
-  localStorage.setItem('krk_schema', '20260714');
+  localStorage.setItem('krk_schema', '20260715');
 }
 const store = {
   get(k, d) { try { const v = localStorage.getItem('krk_'+k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
