@@ -1,10 +1,11 @@
 {
     "settings":  {
-                     "speed":  0.8,
+                     "speed":  1,
                      "vol":  80,
                      "cap":  100,
                      "calm":  false,
-                     "lyr":  84
+                     "lyr":  124,
+                     "videofull":  false
                  },
     "counts":  {
 
